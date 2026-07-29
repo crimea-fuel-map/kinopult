@@ -184,14 +184,7 @@
       },
     };
 
-    if (Array.isArray(Lampa.Manifest.plugins)) {
-      var exists = Lampa.Manifest.plugins.some(function (plugin) {
-        return plugin && plugin.component === manifest.component;
-      });
-      if (!exists) Lampa.Manifest.plugins.push(manifest);
-    } else {
-      Lampa.Manifest.plugins = manifest;
-    }
+    Lampa.Manifest.plugins = manifest;
   }
 
   function addSourceSetting(source) {
