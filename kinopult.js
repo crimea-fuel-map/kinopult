@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  var VERSION = "1.0.1";
+  var VERSION = "1.1.0";
   var COMPONENT = "kinopult";
   var SOURCE_COMPONENT = "kinopult_independent_online";
   var script = document.currentScript;
@@ -370,6 +370,75 @@
     return true;
   }
 
+  function addCardButton(event) {
+    if (
+      !event ||
+      event.type !== "complite" ||
+      !event.object ||
+      !event.object.activity ||
+      typeof event.object.activity.render !== "function" ||
+      typeof window.$ !== "function"
+    ) {
+      return false;
+    }
+
+    var root = event.object.activity.render();
+    if (!root || typeof root.find !== "function") return false;
+    if (root.find(".kinopult--button").length) return true;
+
+    var container = root.find(".buttons--container");
+    if (container && typeof container.first === "function") container = container.first();
+
+    if (!container || !container.length) {
+      var anchor = root.find(".view--torrent");
+      if (anchor && typeof anchor.first === "function") anchor = anchor.first();
+      if (anchor && anchor.length && typeof anchor.parent === "function") container = anchor.parent();
+    }
+
+    if (!container || !container.length || typeof container.append !== "function") return false;
+
+    var movie =
+      (event.data && event.data.movie) ||
+      event.object.activity.card ||
+      event.object.activity.movie ||
+      {};
+    var button = $(
+      '<div class="full-start__button selector view--online kinopult--button" ' +
+        'data-subtitle="КиноПульт v' +
+        VERSION +
+        '">' +
+        '<svg width="32" height="32" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<rect x="14" y="24" width="100" height="72" rx="12" stroke="currentColor" stroke-width="9"/>' +
+        '<path d="M52 45L84 60L52 77V45Z" fill="currentColor"/>' +
+        '<path d="M45 108H83" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>' +
+        "</svg>" +
+        "<span>КиноПульт</span>" +
+        "</div>"
+    );
+
+    button.on("hover:enter", function () {
+      launch(movie);
+    });
+    container.append(button);
+    return true;
+  }
+
+  function addButtonToCurrentCard() {
+    try {
+      if (!Lampa.Activity || typeof Lampa.Activity.active !== "function") return false;
+      var active = Lampa.Activity.active();
+      if (!active || active.component !== "full" || !active.activity) return false;
+
+      return addCardButton({
+        type: "complite",
+        object: { activity: active.activity },
+        data: { movie: active.card || active.movie || active.activity.card || {} },
+      });
+    } catch (error) {
+      return false;
+    }
+  }
+
   function addSettings() {
     if (!Lampa.SettingsApi || window.kinopultIndependentSettings) return;
     window.kinopultIndependentSettings = true;
@@ -424,10 +493,13 @@
     registerManifest();
     addSettings();
 
-    Lampa.Listener.follow("full", function () {
+    Lampa.Listener.follow("full", function (event) {
       registerManifest();
+      addCardButton(event);
     });
 
+    setTimeout(addButtonToCurrentCard, 0);
+    setTimeout(addButtonToCurrentCard, 1000);
     notify("КиноПульт установлен");
   }
 
