@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  var VERSION = "1.1.0";
+  var VERSION = "1.1.1";
   var COMPONENT = "kinopult";
   var SOURCE_COMPONENT = "kinopult_independent_online";
   var script = document.currentScript;
@@ -250,21 +250,20 @@
   }
 
   function playFile(item, file, allFiles) {
-    var playlist = allFiles.map(function (entry) {
-      return {
-        title: item.title + (entry.title ? " — " + entry.title : ""),
-        url: entry.url,
-        quality: entry.quality || 0,
-      };
+    var qualities = {};
+    allFiles.forEach(function (entry) {
+      var key = entry.quality ? String(entry.quality) : entry.title || "MP4";
+      qualities[key] = entry.url;
     });
+
     var selected = {
       title: item.title + (file.title ? " — " + file.title : ""),
       url: file.url,
-      quality: file.quality || 0,
+      quality: qualities,
     };
 
-    if (Lampa.Player.playlist) Lampa.Player.playlist(playlist);
     Lampa.Player.play(selected);
+    if (Lampa.Player.playlist) Lampa.Player.playlist([selected]);
   }
 
   function openQualities(item) {
