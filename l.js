@@ -4,6 +4,13 @@
   if (window.kinopultPluginReady) return;
   window.kinopultPluginReady = true;
 
+  var kinopultIcon =
+    '<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+    '<rect x="14" y="24" width="100" height="72" rx="12" stroke="currentColor" stroke-width="9"/>' +
+    '<path d="M52 45L84 60L52 77V45Z" fill="currentColor"/>' +
+    '<path d="M45 108H83" stroke="currentColor" stroke-width="9" stroke-linecap="round"/>' +
+    "</svg>";
+
   function startPlugin() {
     if (!window.Lampa || !Lampa.SettingsApi) {
       setTimeout(startPlugin, 500);
@@ -16,6 +23,7 @@
     Lampa.SettingsApi.addComponent({
       component: "kinopult",
       name: "КиноПульт",
+      icon: kinopultIcon,
     });
 
     Lampa.SettingsApi.addParam({
@@ -23,6 +31,7 @@
       param: {
         name: "kinopult_connection_test",
         type: "trigger",
+        default: false,
       },
       field: {
         name: "Проверить подключение",
