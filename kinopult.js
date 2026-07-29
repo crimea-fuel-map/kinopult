@@ -53,6 +53,35 @@
     });
   }
 
+  function nativeJson(url) {
+    if (window.Lampa && Lampa.Reguest) {
+      return new Promise(function (resolve, reject) {
+        var network = new Lampa.Reguest();
+        network.timeout(20000);
+        network.native(
+          url,
+          function (data) {
+            try {
+              resolve(typeof data === "string" ? JSON.parse(data) : data);
+            } catch (error) {
+              reject(new Error("Сервис вернул некорректный ответ"));
+            }
+          },
+          function () {
+            reject(new Error("Сервис недоступен"));
+          },
+          false,
+          { dataType: "json" }
+        );
+      });
+    }
+
+    return fetch(url, { headers: { Accept: "application/json" } }).then(function (response) {
+      if (!response.ok) throw new Error("Сервис недоступен");
+      return response.json();
+    });
+  }
+
   function clean(value, maxLength) {
     return String(value || "")
       .replace(/[\u0000-\u001f\u007f]/g, " ")
@@ -97,13 +126,7 @@
       params.append("fl[]", field);
     });
 
-    return fetch("https://archive.org/advancedsearch.php?" + params.toString(), {
-      headers: { Accept: "application/json" },
-    })
-      .then(function (response) {
-        if (!response.ok) throw new Error("Internet Archive временно недоступен");
-        return response.json();
-      })
+    return nativeJson("https://archive.org/advancedsearch.php?" + params.toString())
       .then(function (payload) {
         var requestedYear = Number(movie.year);
         var docs = (payload.response && payload.response.docs) || [];
@@ -148,13 +171,7 @@
   }
 
   function directArchiveItem(item) {
-    return fetch("https://archive.org/metadata/" + encodeURIComponent(item.id), {
-      headers: { Accept: "application/json" },
-    })
-      .then(function (response) {
-        if (!response.ok) throw new Error("Не удалось получить список видеофайлов");
-        return response.json();
-      })
+    return nativeJson("https://archive.org/metadata/" + encodeURIComponent(item.id))
       .then(function (payload) {
         var metadata = payload.metadata || {};
         var allowed =
