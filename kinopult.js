@@ -1,9 +1,9 @@
 (function () {
   "use strict";
 
-  var VERSION = "1.0.0";
+  var VERSION = "1.0.1";
   var COMPONENT = "kinopult";
-  var SOURCE_COMPONENT = "kinopult_online";
+  var SOURCE_COMPONENT = "kinopult_independent_online";
   var script = document.currentScript;
   var API_ROOT = script && script.src ? new URL(script.src).origin : "https://crimea-fuel-map.github.io";
 
